@@ -17,6 +17,4 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
             'contact_information', 'position', 'department'
         ]
     
-class PasswordChangeSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True, write_only=True)
-    new_password = serializers.CharField(required=True, write_only=True)
+
