@@ -12,3 +12,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
+        
+class ProjectPerformanceSerializer(serializers.Serializer):
+    project_name = serializers.CharField()
+    performance_score = serializers.FloatField()

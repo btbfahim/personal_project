@@ -6,7 +6,8 @@ from .permissions import IsManagerUser
 from rest_framework.permissions import IsAuthenticated
 from .response_codes import ResponseCodes, create_response
 from rest_framework import status
-
+from decimal import Decimal
+from django.db.models import Sum, F
 @api_view(['GET'])
 def project_list(request):
     projects = Project.objects.all()
@@ -162,3 +163,65 @@ def assign_task_to_employee(request, task_id):
     task.save()
     serializer=TaskSerializer(task)
     return create_response(200, ResponseCodes.SUCCESS, True, serializer.data, None, None)
+
+@api_view(['GET'])
+def employee_performance(request, employee_id):
+    try:
+        employee = CustomUser.objects.get(id=employee_id, role='employee')
+    except CustomUser.DoesNotExist:
+        return create_response(404, ResponseCodes.ERROR, False, None, "EMPLOYEE_NOT_FOUND", "Employee not found.")
+
+    # Calculate the number of projects worked on by the employee
+    projects_worked = Project.objects.filter(tasks__assigned_to=employee).distinct().count()
+
+    # Calculate the number of completed tasks by the employee
+    tasks_completed = Task.objects.filter(assigned_to=employee, status='completed').count()
+
+    # Calculate the performance indicator (for example, based on a specific formula)
+    performance_indicator = (tasks_completed / max(projects_worked, 1)) * 100
+
+    # Create a response dictionary with the calculated data
+    response_data = {
+        "employee_name": employee.name,
+        "projects_worked": projects_worked,
+        "tasks_completed": tasks_completed,
+        "performance_indicator": Decimal(performance_indicator).quantize(Decimal("0.00")),
+    }
+
+    return create_response(200, ResponseCodes.SUCCESS, True, response_data, None, None)
+
+@api_view(['GET'])
+@permission_classes([IsManagerUser])
+def employee_performance(request,employee_id):
+    try:
+        employee = CustomUser.objects.get(id=employee_id)
+    except CustomUser.DoesNotExist:
+        return None  # Handle the case where the employee does not exist
+
+    # Find the projects the employee has worked on
+    projects_worked_on = Project.objects.filter(tasks__assigned_to=employee).distinct()
+
+    # Create a dictionary to store project names as keys and performance scores as values
+    project_performance = {}
+
+    for project in projects_worked_on:
+        # Calculate the total tasks in the project
+        total_tasks_in_project = Task.objects.filter(project=project).count()
+        
+        # Calculate the total tasks completed by the employee in the project
+        total_tasks_completed_by_employee = Task.objects.filter(project=project, assigned_to=employee, status='completed').count()
+
+        # Calculate the performance score for the project
+        if total_tasks_in_project > 0:
+            project_performance[project.name] = (total_tasks_completed_by_employee / total_tasks_in_project) * 100
+        else:
+            project_performance[project.name] = 0
+    performance_data = [
+    {'project_name': project_name, 'performance_score': score}
+    for project_name, score in project_performance.items()
+    ]
+
+    serializer = ProjectPerformanceSerializer(data=performance_data, many=True)
+    serializer.is_valid()  # Check if the data is valid
+    serialized_data = serializer.data
+    return create_response(200, ResponseCodes.SUCCESS, True, serialized_data, None, None)
