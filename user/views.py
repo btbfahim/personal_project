@@ -44,7 +44,7 @@ def user_logout(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def create_employee(request):
     try:
         # Extract the required fields from request.data
@@ -125,10 +125,8 @@ def update_employee(request, user_id):
             error = serializer.errors
             return create_response(400, ResponseCodes.ERROR, False, None, error_code, error)
             
-    except CustomUser.DoesNotExist:
-        error_code = "Not Found"
-        error = "Employee not found"
-        return create_response(404, ResponseCodes.ERROR, False, None, error_code, error)
+    except Exception as e:
+        return create_response(404, ResponseCodes.ERROR, False, None, "Employee not found", str(e))
 
 # Delete a specific employee profile
 @api_view(['DELETE'])

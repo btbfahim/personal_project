@@ -1,5 +1,5 @@
 from django.db import models
-from django.db import models
+
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
 class CustomUser(AbstractUser):
@@ -28,3 +28,7 @@ class CustomUser(AbstractUser):
         blank=True,
         related_name='customuser_set',
     )
+
+    def __str__(self):
+        return self.username
+    

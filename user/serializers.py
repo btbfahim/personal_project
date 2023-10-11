@@ -1,7 +1,6 @@
 from .models import CustomUser
 from rest_framework import serializers
-from rest_framework import serializers
-from .models import CustomUser  # Import your CustomUser model
+from .models import CustomUser # Import your CustomUser model
 
 
 
