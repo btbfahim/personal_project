@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Office Management!!</title>
+    <style>
+        title{
+            text-align: center;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .welcome-box {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #b15b5b;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .text {
+            color: black;
+        }
+        .change-password-btn {
+            display: inline-block;
+            margin: 30px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .change-password-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-box">
+        <h1 class="welcome-message">Welcome, {{ username }}!</h1>
+        <div class="text"> You must change your password before you login click below to change password</div>
+        <a href="#" class="change-password-btn">Change Password</a>
+    </div>
+
+</body>
+</html>
