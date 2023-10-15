@@ -14,6 +14,8 @@ from django.template.loader import render_to_string
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 # Login View
+
+@swagger_auto_schema( method='post',request_body=EmployeeProfileSerializer)
 @api_view(['POST'])
 def user_login(request):
     try:
@@ -109,6 +111,7 @@ def retrieve_employee(request, user_id):
         return create_response(404, ResponseCodes.ERROR, False, None, error_code, error)
 
 # Update a specific employee profile
+@swagger_auto_schema(methods=['put'], request_body=EmployeeProfileSerializer)
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_employee(request, user_id):
@@ -148,7 +151,8 @@ def delete_employee(request, user_id):
         error = "Employee not found"
 
         return create_response(404, ResponseCodes.ERROR, False, None, error_code, error)
-    
+
+@swagger_auto_schema( method='post',request_body=EmployeeProfileSerializer)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password(request):

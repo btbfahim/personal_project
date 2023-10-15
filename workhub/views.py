@@ -11,12 +11,15 @@ from decimal import Decimal
 from django.db.models import Sum, F
 import csv
 from django.http import HttpResponse
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 @api_view(['GET'])
 def project_list(request):
     projects = Project.objects.all()
     serializer = ProjectSerializer(projects, many=True)
     return create_response(status.HTTP_200_OK, ResponseCodes.SUCCESS, True, serializer.data, None, None)
 
+@swagger_auto_schema(methods=['post', 'put'], request_body=ProjectSerializer)
 @api_view(['POST', 'PUT'])
 @permission_classes([IsManagerUser])
 def project_create_or_update(request, project_id=None):
@@ -70,7 +73,7 @@ def project_delete(request, project_id):
     project.delete()
     return create_response(status.HTTP_204_NO_CONTENT, ResponseCodes.SUCCESS, True, None, None, None)
 
-
+@swagger_auto_schema(methods=['post', 'put'], request_body=TaskSerializer)
 @api_view(['POST', 'PUT'])
 @permission_classes([IsManagerUser])
 def create_or_update_task(request, task_id=None):
@@ -127,7 +130,8 @@ def create_or_update_task(request, task_id=None):
         task.save()
         serializer = TaskSerializer(task)
         return create_response(200, ResponseCodes.SUCCESS, True, serializer.data, None, None)
-    
+
+   
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def task_retrieve(request, task_id):
@@ -151,7 +155,7 @@ def task_delete(request, task_id):
     task.delete()
     return create_response(200, ResponseCodes.SUCCESS, True, None, None, None)
     
-
+@swagger_auto_schema(methods=['put'], request_body=TaskSerializer)
 @api_view(['PUT'])
 @permission_classes([IsManagerUser])
 def assign_task_to_employee(request, task_id):
