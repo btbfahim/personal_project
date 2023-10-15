@@ -3,11 +3,14 @@ from .models import *
 from .serializers import *
 from user.models import CustomUser
 from .permissions import IsManagerUser
+from user.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
 from .response_codes import ResponseCodes, create_response
 from rest_framework import status
 from decimal import Decimal
 from django.db.models import Sum, F
+import csv
+from django.http import HttpResponse
 @api_view(['GET'])
 def project_list(request):
     projects = Project.objects.all()
@@ -165,33 +168,7 @@ def assign_task_to_employee(request, task_id):
     return create_response(200, ResponseCodes.SUCCESS, True, serializer.data, None, None)
 
 @api_view(['GET'])
-def employee_performance(request, employee_id):
-    try:
-        employee = CustomUser.objects.get(id=employee_id, role='employee')
-    except CustomUser.DoesNotExist:
-        return create_response(404, ResponseCodes.ERROR, False, None, "EMPLOYEE_NOT_FOUND", "Employee not found.")
-
-    # Calculate the number of projects worked on by the employee
-    projects_worked = Project.objects.filter(tasks__assigned_to=employee).distinct().count()
-
-    # Calculate the number of completed tasks by the employee
-    tasks_completed = Task.objects.filter(assigned_to=employee, status='completed').count()
-
-    # Calculate the performance indicator (for example, based on a specific formula)
-    performance_indicator = (tasks_completed / max(projects_worked, 1)) * 100
-
-    # Create a response dictionary with the calculated data
-    response_data = {
-        "employee_name": employee.name,
-        "projects_worked": projects_worked,
-        "tasks_completed": tasks_completed,
-        "performance_indicator": Decimal(performance_indicator).quantize(Decimal("0.00")),
-    }
-
-    return create_response(200, ResponseCodes.SUCCESS, True, response_data, None, None)
-
-@api_view(['GET'])
-@permission_classes([IsManagerUser])
+@permission_classes([IsAdminUser])
 def employee_performance(request,employee_id):
     try:
         employee = CustomUser.objects.get(id=employee_id)
@@ -216,12 +193,14 @@ def employee_performance(request,employee_id):
             project_performance[project.name] = (total_tasks_completed_by_employee / total_tasks_in_project) * 100
         else:
             project_performance[project.name] = 0
-    performance_data = [
-    {'project_name': project_name, 'performance_score': score}
-    for project_name, score in project_performance.items()
-    ]
 
-    serializer = ProjectPerformanceSerializer(data=performance_data, many=True)
-    serializer.is_valid()  # Check if the data is valid
-    serialized_data = serializer.data
-    return create_response(200, ResponseCodes.SUCCESS, True, serialized_data, None, None)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="performance.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Project Name', 'Performance Score'])  # Header row
+    
+    for project_name, score in project_performance.items():
+        writer.writerow([project_name, score])  # Data rows
+
+    return response

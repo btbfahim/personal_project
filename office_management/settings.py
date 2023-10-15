@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'workhub.apps.WorkhubConfig',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
