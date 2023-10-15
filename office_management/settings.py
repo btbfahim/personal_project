@@ -139,3 +139,16 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'a0852fdaa8b49cf48e84051104cf96d5' 
 EMAIL_HOST_PASSWORD = 'ffc117018e67cdaae6c8949139b6554b'  
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        },
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}

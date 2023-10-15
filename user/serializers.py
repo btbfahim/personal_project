@@ -1,10 +1,10 @@
 from .models import CustomUser
 from rest_framework import serializers
-from .models import CustomUser # Import your CustomUser model
+from .models import CustomUser 
 
 
 
-class UserLoginSerializer(serializers.Serializer):  # Not linked to the model
+class UserLoginSerializer(serializers.Serializer): 
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 

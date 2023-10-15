@@ -11,6 +11,8 @@ from .response_codes import *
 from django.contrib.auth import update_session_auth_hash
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 # Login View
 @api_view(['POST'])
 def user_login(request):
@@ -42,7 +44,7 @@ def user_logout(request):
             400, ResponseCodes.ERROR, False, "No active session found")
 
 
-
+@swagger_auto_schema(methods=['post'], request_body=EmployeeProfileSerializer)
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def create_employee(request):

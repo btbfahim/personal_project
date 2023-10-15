@@ -5,7 +5,7 @@ from user.models import CustomUser
 from .permissions import IsManagerUser
 from user.permissions import IsAdminUser
 from rest_framework.permissions import IsAuthenticated
-from .response_codes import ResponseCodes, create_response
+from user.response_codes import ResponseCodes, create_response
 from rest_framework import status
 from decimal import Decimal
 from django.db.models import Sum, F
@@ -23,7 +23,7 @@ def project_create_or_update(request, project_id=None):
     if request.method == 'POST':
         project_data = request.data
         if 'name' in project_data and 'description' in project_data:
-            # Create a new project instance using ORM
+    
             project = Project.objects.create(
                 name=project_data['name'],
                 description=project_data['description']
@@ -90,13 +90,13 @@ def create_or_update_task(request, task_id=None):
             project_id=project_id,
             name=task_data.get('name'),
             description=task_data.get('description'),
-            priority=task_data.get('priority', 'medium'),  # Default to 'medium' if not provided
-            status=task_data.get('status', 'not_started'),  # Default to 'not_started' if not provided
+            priority=task_data.get('priority', 'medium'),  
+            status=task_data.get('status', 'not_started'), 
             start_date=task_data.get('start_date'),
             due_date=task_data.get('due_date'),
-            # Add other task fields here as needed
+           
         )
-        # Serialize the task and send it as a response
+     
         task_serializer = TaskSerializer(task)
         return create_response(201, ResponseCodes.SUCCESS, True, task_serializer.data, None, None)
 
@@ -173,22 +173,16 @@ def employee_performance(request,employee_id):
     try:
         employee = CustomUser.objects.get(id=employee_id)
     except CustomUser.DoesNotExist:
-        return None  # Handle the case where the employee does not exist
-
-    # Find the projects the employee has worked on
+        return None 
+     
     projects_worked_on = Project.objects.filter(tasks__assigned_to=employee).distinct()
-
-    # Create a dictionary to store project names as keys and performance scores as values
     project_performance = {}
 
     for project in projects_worked_on:
-        # Calculate the total tasks in the project
         total_tasks_in_project = Task.objects.filter(project=project).count()
         
-        # Calculate the total tasks completed by the employee in the project
         total_tasks_completed_by_employee = Task.objects.filter(project=project, assigned_to=employee, status='completed').count()
 
-        # Calculate the performance score for the project
         if total_tasks_in_project > 0:
             project_performance[project.name] = (total_tasks_completed_by_employee / total_tasks_in_project) * 100
         else:
@@ -198,9 +192,9 @@ def employee_performance(request,employee_id):
     response['Content-Disposition'] = 'attachment; filename="performance.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Project Name', 'Performance Score'])  # Header row
+    writer.writerow(['Project Name', 'Performance Score'])  
     
     for project_name, score in project_performance.items():
-        writer.writerow([project_name, score])  # Data rows
+        writer.writerow([project_name, score]) 
 
     return response
